@@ -258,9 +258,7 @@ jobs:
       - name: Check if the repository was modified during runtime to prevent autocommit failure.
         if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
         run: |
-          git stash
-          git pull --rebase
-          git stash apply
+          git pull --autostash --rebase
 
       - name: Generate CHANGELOG.md
         if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
