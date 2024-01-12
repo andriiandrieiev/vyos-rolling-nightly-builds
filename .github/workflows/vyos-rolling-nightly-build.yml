@@ -293,14 +293,14 @@ jobs:
             ./vyos-${{ env.BUILD_VERSION }}-amd64.iso
           # ./vyos-${{ env.BUILD_VERSION }}-amd64.iso.minisig
 
-      - name: Remove old releases
-        if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
-        uses: dev-drprasad/delete-older-releases@v0.2.1
-        with:
-          keep_latest: 30
-          delete_tags: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+      # - name: Remove old releases
+      #   if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
+      #   uses: dev-drprasad/delete-older-releases@v0.2.1
+      #   with:
+      #     keep_latest: 30
+      #     delete_tags: true
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 
      ### Slack notification ###
         
