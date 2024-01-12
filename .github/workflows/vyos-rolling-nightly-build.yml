@@ -255,17 +255,11 @@ jobs:
         run: |
           sudo chown -R $(whoami):$(whoami) ./*
         
-      - name: Make git stash
+      - name: Check if the repository was modified during runtime to prevent autocommit failure.
         if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
         run: |
           git stash
-          
-      - uses: actions/checkout@v4 # If someone pushes commit to this repo while building process the workflow would fall on autocommit step. There is a fix.
-        if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
-
-      - name: Make git unstash
-        if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
-        run: |
+          git pull --rebase
           git stash apply
 
       - name: Generate CHANGELOG.md
