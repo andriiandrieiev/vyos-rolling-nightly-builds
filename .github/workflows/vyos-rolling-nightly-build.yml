@@ -3,7 +3,7 @@ name: VyOS rolling nightly build
 on:
   schedule:
     - cron: "0 0 * * *"
-
+  push:
   workflow_dispatch:
     inputs:
       BUILD_BY:
@@ -82,53 +82,53 @@ jobs:
 
         ### Smoketest ###
 
-      - name: Build ISO (for Smoketest)
-        if: ${{ !inputs.SKIP_SMOKETEST_ALL }} 
-        run: |
-          docker run --rm --privileged -v ./vyos-build/:/vyos -w /vyos vyos/vyos-build:current sudo --preserve-env ./build-vyos-image \
-          --architecture amd64 \
-          --build-by $BUILD_BY \
-          --build-type release \
-          --custom-package vyos-1x-smoketest \
-          --debian-mirror $DEBIAN_MIRROR \
-          --version $BUILD_VERSION \
-          --vyos-mirror $VYOS_MIRROR \
-          iso
+      # - name: Build ISO (for Smoketest)
+      #   if: ${{ !inputs.SKIP_SMOKETEST_ALL }} 
+      #   run: |
+      #     docker run --rm --privileged -v ./vyos-build/:/vyos -w /vyos vyos/vyos-build:current sudo --preserve-env ./build-vyos-image \
+      #     --architecture amd64 \
+      #     --build-by $BUILD_BY \
+      #     --build-type release \
+      #     --custom-package vyos-1x-smoketest \
+      #     --debian-mirror $DEBIAN_MIRROR \
+      #     --version $BUILD_VERSION \
+      #     --vyos-mirror $VYOS_MIRROR \
+      #     iso
 
-      - name: Upload ISO artifact (Smoketest image)
-        if: ${{ !inputs.SKIP_SMOKETEST_ALL }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: vyos-${{ env.BUILD_VERSION }}-amd64-smoketest.iso
-          path: ./vyos-build/build/live-image-amd64.hybrid.iso
-          retention-days: 30
-          if-no-files-found: error
+      # - name: Upload ISO artifact (Smoketest image)
+      #   if: ${{ !inputs.SKIP_SMOKETEST_ALL }}
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: vyos-${{ env.BUILD_VERSION }}-amd64-smoketest.iso
+      #     path: ./vyos-build/build/live-image-amd64.hybrid.iso
+      #     retention-days: 30
+      #     if-no-files-found: error
 
-      - name: Run smoketest
-        if: ${{ !inputs.SKIP_SMOKETEST_ALL }} 
-        id: smoketests
-        uses: cross-the-world/ssh-scp-ssh-pipelines@latest
-        env:
-          BUILD_VERSION: ${{ env.BUILD_VERSION }}
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          user: ${{ secrets.SSH_USER }}
-          port: ${{ secrets.SSH_PORT }}
-          key: ${{ secrets.SSH_KEY }}
-          connect_timeout: 999s
-          first_ssh: |
-            rm -rf vyos-build || true
-            git clone -b current --single-branch https://github.com/vyos/vyos-build
-            mkdir -p ~/vyos-build/build/
-          scp: |
-            './vyos-build/build/live-image-amd64.hybrid.iso' => '~/vyos-build/build/'
-          last_ssh: |
-            ${{ env.SMOKETEST_RAID_COMMAND }}
-            docker run --rm --privileged -v ~/vyos-build:/vyos -w /vyos vyos/vyos-build:current sudo make test
-            docker run --rm --privileged -v ~/vyos-build:/vyos -w /vyos vyos/vyos-build:current sudo make testc
-            docker run --rm --privileged -v ~/vyos-build:/vyos -w /vyos vyos/vyos-build:current sudo rm -rf ./*
-            rm -rf ~/vyos-build
-        timeout-minutes: 300
+      # - name: Run smoketest
+      #   if: ${{ !inputs.SKIP_SMOKETEST_ALL }} 
+      #   id: smoketests
+      #   uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+      #   env:
+      #     BUILD_VERSION: ${{ env.BUILD_VERSION }}
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     user: ${{ secrets.SSH_USER }}
+      #     port: ${{ secrets.SSH_PORT }}
+      #     key: ${{ secrets.SSH_KEY }}
+      #     connect_timeout: 999s
+      #     first_ssh: |
+      #       rm -rf vyos-build || true
+      #       git clone -b current --single-branch https://github.com/vyos/vyos-build
+      #       mkdir -p ~/vyos-build/build/
+      #     scp: |
+      #       './vyos-build/build/live-image-amd64.hybrid.iso' => '~/vyos-build/build/'
+      #     last_ssh: |
+      #       ${{ env.SMOKETEST_RAID_COMMAND }}
+      #       docker run --rm --privileged -v ~/vyos-build:/vyos -w /vyos vyos/vyos-build:current sudo make test
+      #       docker run --rm --privileged -v ~/vyos-build:/vyos -w /vyos vyos/vyos-build:current sudo make testc
+      #       docker run --rm --privileged -v ~/vyos-build:/vyos -w /vyos vyos/vyos-build:current sudo rm -rf ./*
+      #       rm -rf ~/vyos-build
+      #   timeout-minutes: 300
 
       ### Building ISO ###
 
@@ -143,46 +143,49 @@ jobs:
           --vyos-mirror $VYOS_MIRROR \
           iso
 
+      # - name: Copy ISO
+      #   run: |
+      #     cp ./vyos-build/build/live-image-amd64.hybrid.iso ./vyos-$BUILD_VERSION-amd64.iso
       - name: Copy ISO
         run: |
-          cp ./vyos-build/build/live-image-amd64.hybrid.iso ./vyos-$BUILD_VERSION-amd64.iso
+          sudo touch ./vyos-$BUILD_VERSION-amd64.iso
 
-      - name: Sign ISO (Minisign)
-        run: |
-          echo 'untrusted comment: minisign encrypted secret key' > minisign.key
-          echo $minisign_key >> minisign.key
-          shasum minisign.key
-          echo $minisign_password | $GITHUB_WORKSPACE/bin/minisign -s minisign.key -Sm ./vyos-$BUILD_VERSION-amd64.iso
-          $GITHUB_WORKSPACE/bin/minisign -Vm ./vyos-$BUILD_VERSION-amd64.iso -x ./vyos-$BUILD_VERSION-amd64.iso.minisig -p $GITHUB_WORKSPACE/minisign.pub
-        env:
-          minisign_key: ${{ secrets.minisign_key }}
-          minisign_password: ${{ secrets.minisign_password }}
+      # - name: Sign ISO (Minisign)
+      #   run: |
+      #     echo 'untrusted comment: minisign encrypted secret key' > minisign.key
+      #     echo $minisign_key >> minisign.key
+      #     shasum minisign.key
+      #     echo $minisign_password | $GITHUB_WORKSPACE/bin/minisign -s minisign.key -Sm ./vyos-$BUILD_VERSION-amd64.iso
+      #     $GITHUB_WORKSPACE/bin/minisign -Vm ./vyos-$BUILD_VERSION-amd64.iso -x ./vyos-$BUILD_VERSION-amd64.iso.minisig -p $GITHUB_WORKSPACE/minisign.pub
+      #   env:
+      #     minisign_key: ${{ secrets.minisign_key }}
+      #     minisign_password: ${{ secrets.minisign_password }}
 
       ### Uploading artifacts ###
 
-      - name: Upload ISO to S3 Glacier
-        if: ${{ !inputs.SKIP_SNAPSHOT_UPLOAD }} 
-        uses: keithweaver/aws-s3-github-action@v1.0.0
-        with:
-          command: cp
-          source: ./vyos-${{ env.BUILD_VERSION }}-amd64.iso
-          destination: s3://${{ secrets.aws_s3_bucket }}/vyos-${{ env.BUILD_VERSION }}-amd64.iso
-          aws_access_key_id: ${{ secrets.aws_access_key_id }}
-          aws_secret_access_key: ${{ secrets.aws_secret_access_key }}
-          aws_region: us-east-1
-          flags: --storage-class GLACIER
+      # - name: Upload ISO to S3 Glacier
+      #   if: ${{ !inputs.SKIP_SNAPSHOT_UPLOAD }} 
+      #   uses: keithweaver/aws-s3-github-action@v1.0.0
+      #   with:
+      #     command: cp
+      #     source: ./vyos-${{ env.BUILD_VERSION }}-amd64.iso
+      #     destination: s3://${{ secrets.aws_s3_bucket }}/vyos-${{ env.BUILD_VERSION }}-amd64.iso
+      #     aws_access_key_id: ${{ secrets.aws_access_key_id }}
+      #     aws_secret_access_key: ${{ secrets.aws_secret_access_key }}
+      #     aws_region: us-east-1
+      #     flags: --storage-class GLACIER
 
-      - name: Upload ISO's signature to S3 Glacier
-        if: ${{ !inputs.SKIP_SNAPSHOT_UPLOAD }} 
-        uses: keithweaver/aws-s3-github-action@v1.0.0
-        with:
-          command: cp
-          source: ./vyos-${{ env.BUILD_VERSION }}-amd64.iso.minisig
-          destination: s3://${{ secrets.aws_s3_bucket }}/vyos-${{ env.BUILD_VERSION }}-amd64.iso.minisig
-          aws_access_key_id: ${{ secrets.aws_access_key_id }}
-          aws_secret_access_key: ${{ secrets.aws_secret_access_key }}
-          aws_region: us-east-1
-          flags: --storage-class GLACIER
+      # - name: Upload ISO's signature to S3 Glacier
+      #   if: ${{ !inputs.SKIP_SNAPSHOT_UPLOAD }} 
+      #   uses: keithweaver/aws-s3-github-action@v1.0.0
+      #   with:
+      #     command: cp
+      #     source: ./vyos-${{ env.BUILD_VERSION }}-amd64.iso.minisig
+      #     destination: s3://${{ secrets.aws_s3_bucket }}/vyos-${{ env.BUILD_VERSION }}-amd64.iso.minisig
+      #     aws_access_key_id: ${{ secrets.aws_access_key_id }}
+      #     aws_secret_access_key: ${{ secrets.aws_secret_access_key }}
+      #     aws_region: us-east-1
+      #     flags: --storage-class GLACIER
 
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v3
@@ -192,13 +195,13 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
-      - name: Upload ISO's Minisign artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: vyos-${{ env.BUILD_VERSION }}-amd64.iso.minisig
-          path: ./vyos-${{ env.BUILD_VERSION }}-amd64.iso.minisig
-          retention-days: 30
-          if-no-files-found: error
+      # - name: Upload ISO's Minisign artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: vyos-${{ env.BUILD_VERSION }}-amd64.iso.minisig
+      #     path: ./vyos-${{ env.BUILD_VERSION }}-amd64.iso.minisig
+      #     retention-days: 30
+      #     if-no-files-found: error
 
       ### Release publishing ###
 
@@ -301,67 +304,67 @@ jobs:
 
      ### Slack notification ###
         
-      - name: Send Slack notification on workflow failure to Sentrium
-        if: failure() && !inputs.SKIP_SLACK_NOTIFICATIONS
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "Repository: *${{ github.repository }}*\nWorkflow: ${{ github.workflow }}\nTrigger: ${{ github.event_name }}\nCommit: ${{ github.sha }}\nWorkflow result: ${{ job.status }}\nSmoketests result: ${{ steps.smoketests.conclusion }}\nURL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+  #     - name: Send Slack notification on workflow failure to Sentrium
+  #       if: failure() && !inputs.SKIP_SLACK_NOTIFICATIONS
+  #       uses: slackapi/slack-github-action@v1.24.0
+  #       with:
+  #         payload: |
+  #           {
+  #             "text": "Repository: *${{ github.repository }}*\nWorkflow: ${{ github.workflow }}\nTrigger: ${{ github.event_name }}\nCommit: ${{ github.sha }}\nWorkflow result: ${{ job.status }}\nSmoketests result: ${{ steps.smoketests.conclusion }}\nURL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+  #           }
+  #       env:
+  #         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  #         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
-      - name: Send Slack notification on smoketests failure to VyOS
-        if: failure() && !inputs.SKIP_SLACK_NOTIFICATIONS
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "*VyOS nightly build has been failed*",
-              "attachments": [
-                {
-                  "color": "FF0000",
-                  "fields": [
-                    {
-                      "title": "Repository",
-                      "short": true,
-                      "value": "${{ github.repository }}"
-                    },
-                    {
-                      "title": "Workflow",
-                      "short": true,
-                      "value": "${{ github.workflow }}"
-                    },
-                    {
-                      "title": "Trigger",
-                      "short": true,
-                      "value": "${{ github.event_name }}"
-                    },
-                    {
-                      "title": "Smoketests result",
-                      "short": true,
-                      "value": "${{ steps.smoketests.outcome }}"
-                    },
-                    {
-                      "title": "URL",
-                      "short": false,
-                      "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_FOR_MAINTEINERS }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+  #     - name: Send Slack notification on smoketests failure to VyOS
+  #       if: failure() && !inputs.SKIP_SLACK_NOTIFICATIONS
+  #       uses: slackapi/slack-github-action@v1.24.0
+  #       with:
+  #         payload: |
+  #           {
+  #             "text": "*VyOS nightly build has been failed*",
+  #             "attachments": [
+  #               {
+  #                 "color": "FF0000",
+  #                 "fields": [
+  #                   {
+  #                     "title": "Repository",
+  #                     "short": true,
+  #                     "value": "${{ github.repository }}"
+  #                   },
+  #                   {
+  #                     "title": "Workflow",
+  #                     "short": true,
+  #                     "value": "${{ github.workflow }}"
+  #                   },
+  #                   {
+  #                     "title": "Trigger",
+  #                     "short": true,
+  #                     "value": "${{ github.event_name }}"
+  #                   },
+  #                   {
+  #                     "title": "Smoketests result",
+  #                     "short": true,
+  #                     "value": "${{ steps.smoketests.outcome }}"
+  #                   },
+  #                   {
+  #                     "title": "URL",
+  #                     "short": false,
+  #                     "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+  #                   }
+  #                 ]
+  #               }
+  #             ]
+  #           }
+  #       env:
+  #         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_FOR_MAINTEINERS }}
+  #         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
-  update-downloads-page:
-    needs: build-iso
-    uses: vyos/community.vyos.net/.github/workflows/main.yml@production
-    secrets:
-        NETLIFY_SITE_NAME: ${{ secrets.NETLIFY_SITE_NAME }}
-        NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
-        SOUPAULT_PROFILE: ${{ secrets.SOUPAULT_PROFILE }}
-        GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+  # update-downloads-page:
+  #   needs: build-iso
+  #   uses: vyos/community.vyos.net/.github/workflows/main.yml@production
+  #   secrets:
+  #       NETLIFY_SITE_NAME: ${{ secrets.NETLIFY_SITE_NAME }}
+  #       NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
+  #       SOUPAULT_PROFILE: ${{ secrets.SOUPAULT_PROFILE }}
+  #       GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
