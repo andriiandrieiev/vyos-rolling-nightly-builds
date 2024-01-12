@@ -148,7 +148,8 @@ jobs:
       #     cp ./vyos-build/build/live-image-amd64.hybrid.iso ./vyos-$BUILD_VERSION-amd64.iso
       - name: Copy ISO
         run: |
-          sudo echo $BUILD_VERSION > ./vyos-$BUILD_VERSION-amd64.iso
+          echo $BUILD_VERSION > ./vyos-$BUILD_VERSION-amd64.iso
+          sudo chown -R root:root ./vyos-build
 
       # - name: Sign ISO (Minisign)
       #   run: |
@@ -248,6 +249,24 @@ jobs:
               "template": "#{{CHANGELOG}}",
               "pr_template": "- #{{TITLE}}\n   - PR: vyos/vyos-build##{{NUMBER}}"
             }
+
+      - name: Fix files and directories permissions to do checkout
+        if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
+        run: |
+          sudo chown -R $(whoami):$(whoami) ./*
+        
+      - name: Make git stash
+        if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
+        run: |
+          git stash
+          
+      - uses: actions/checkout@v4 # If someone pushes commit to this repo while building process the workflow would fall on autocommit step. There is a fix.
+        if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
+
+      - name: Make git unstash
+        if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
+        run: |
+          git unstash
 
       - name: Generate CHANGELOG.md
         if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
