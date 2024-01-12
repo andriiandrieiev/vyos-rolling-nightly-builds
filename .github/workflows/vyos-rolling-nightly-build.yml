@@ -132,16 +132,16 @@ jobs:
 
       ### Building ISO ###
 
-      - name: Build ISO
-        run: |
-          docker run --rm --privileged -v ./vyos-build/:/vyos -w /vyos vyos/vyos-build:current sudo --preserve-env ./build-vyos-image \
-          --architecture amd64 \
-          --build-by $BUILD_BY \
-          --build-type release \
-          --debian-mirror $DEBIAN_MIRROR \
-          --version $BUILD_VERSION \
-          --vyos-mirror $VYOS_MIRROR \
-          iso
+      # - name: Build ISO
+      #   run: |
+      #     docker run --rm --privileged -v ./vyos-build/:/vyos -w /vyos vyos/vyos-build:current sudo --preserve-env ./build-vyos-image \
+      #     --architecture amd64 \
+      #     --build-by $BUILD_BY \
+      #     --build-type release \
+      #     --debian-mirror $DEBIAN_MIRROR \
+      #     --version $BUILD_VERSION \
+      #     --vyos-mirror $VYOS_MIRROR \
+      #     iso
 
       # - name: Copy ISO
       #   run: |
