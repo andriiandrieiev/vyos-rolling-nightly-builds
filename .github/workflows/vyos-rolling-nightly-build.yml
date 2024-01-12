@@ -148,7 +148,7 @@ jobs:
       #     cp ./vyos-build/build/live-image-amd64.hybrid.iso ./vyos-$BUILD_VERSION-amd64.iso
       - name: Copy ISO
         run: |
-          sudo touch ./vyos-$BUILD_VERSION-amd64.iso
+          sudo echo $BUILD_VERSION > ./vyos-$BUILD_VERSION-amd64.iso
 
       # - name: Sign ISO (Minisign)
       #   run: |
