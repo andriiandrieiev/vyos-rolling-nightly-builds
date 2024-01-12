@@ -291,7 +291,7 @@ jobs:
           fail_on_unmatched_files: true
           files: |
             ./vyos-${{ env.BUILD_VERSION }}-amd64.iso
-            ./vyos-${{ env.BUILD_VERSION }}-amd64.iso.minisig
+          # ./vyos-${{ env.BUILD_VERSION }}-amd64.iso.minisig
 
       - name: Remove old releases
         if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
