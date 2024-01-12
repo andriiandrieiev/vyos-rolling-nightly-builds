@@ -266,7 +266,7 @@ jobs:
       - name: Make git unstash
         if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
         run: |
-          git unstash
+          git stash apply
 
       - name: Generate CHANGELOG.md
         if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
