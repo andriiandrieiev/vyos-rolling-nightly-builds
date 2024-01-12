@@ -250,14 +250,10 @@ jobs:
               "pr_template": "- #{{TITLE}}\n   - PR: vyos/vyos-build##{{NUMBER}}"
             }
 
-      - name: Fix files and directories permissions to do checkout
-        if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
-        run: |
-          sudo chown -R $(whoami):$(whoami) ./*
-        
       - name: Check if the repository was modified during runtime to prevent autocommit failure.
         if: ${{ !inputs.SKIP_RELEASE_PUBLISHING }} 
         run: |
+          sudo chown -R $(whoami):$(whoami) ./*
           git pull --autostash --rebase
 
       - name: Generate CHANGELOG.md
