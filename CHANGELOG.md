@@ -1,13 +1,9 @@
 ## vyos-1x
-- bgp: T5937: fix migration script for IPv6 AFI peer-group
-   - PR: vyos/vyos-1x#2834
-- T5889: Fix migration scripts nat 5-to-6
-   - PR: vyos/vyos-1x#2833
-- T4658: Renamed DPD action value from 'hold' to 'trap'
-   - PR: vyos/vyos-1x#2837
-- image-tools: T5923: update system_console.py for new GRUB file structure
-   - PR: vyos/vyos-1x#2818
+- dhcp: T5948: Strip trailing dot from hostnames
+   - PR: vyos/vyos-1x#2843
+- T5953: Changed values of 'close-action' to Strongswan values
+   - PR: vyos/vyos-1x#2842
 
 
 ## vyos-build
-
+- no changes
