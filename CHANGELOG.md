@@ -1,8 +1,8 @@
 ## vyos-1x
-- vrf: T5973: multiple bugfixes and improvements
-   - PR: vyos/vyos-1x#2877
-- rpki: T6003: Add 'show rpki as-number' and 'show rpki prefix'
-   - PR: vyos/vyos-1x#2906
+- reverse-proxy: T5999: Allow root for exact match in backend rule URL
+   - PR: vyos/vyos-1x#2908
+- T5254: Deleted extra file git
+   - PR: vyos/vyos-1x#2910
 
 
 ## vyos-build
