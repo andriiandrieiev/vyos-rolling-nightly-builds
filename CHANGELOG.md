@@ -1,13 +1,14 @@
 ## vyos-1x
-- xml: T5738: improve PKI building blocks for CLI
-   - PR: vyos/vyos-1x#2982
-- rpki: T6004: add missing startup priority
-   - PR: vyos/vyos-1x#2983
-- bgp: T6010: support setting multiple values for neighbor path-attribute
-   - PR: vyos/vyos-1x#2986
-- srv6: T5849: add segment support to "protocols static route6"
-   - PR: vyos/vyos-1x#2980
+- T6019: fix smoketest after upgrading nftables and libnftnl packages.
+   - PR: vyos/vyos-1x#2991
+- init: T2044: fix "binary operator expected" when two or more RPKI caches are defined
+   - PR: vyos/vyos-1x#2994
+- ipsec: T5981: Strip '@' from migrated peer PKI name
+   - PR: vyos/vyos-1x#2993
 
 
 ## vyos-build
+- T6009-6019: fix hour decoding when timezone offset is negative; bump libnftnl and nftables version.
+   - PR: vyos/vyos-build#501
+
 
