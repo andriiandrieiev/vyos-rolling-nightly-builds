@@ -233,11 +233,12 @@ jobs:
       - name: "Building: sign an ISO image with Minisign"
         id: sign_iso_minisign
         run: |
-          echo "${{ secrets.minisign_private_key }}" >> minisign.key
-          shasum minisign.key
-          echo ${{ secrets.minisign_password }} | $GITHUB_WORKSPACE/bin/minisign -s minisign.key -Sm ./vyos-$BUILD_VERSION-amd64.iso
-          rm minisign.key
-          $GITHUB_WORKSPACE/bin/minisign -Vm ./vyos-$BUILD_VERSION-amd64.iso -x ./vyos-$BUILD_VERSION-amd64.iso.minisig -P $(${{ secrets.minisign_public_key }} | tail -n1)
+          echo "${{ secrets.minisign_private_key }}" > /tmp/minisign.key
+          shasum /tmp/minisign.key
+          echo ${{ secrets.minisign_password }} | $GITHUB_WORKSPACE/bin/minisign -s /tmp/minisign.key -Sm ./vyos-$BUILD_VERSION-amd64.iso
+          echo "${{ secrets.minisign_public_key }}" > /tmp/minisign.pub
+          $GITHUB_WORKSPACE/bin/minisign -Vm ./vyos-$BUILD_VERSION-amd64.iso -x ./vyos-$BUILD_VERSION-amd64.iso.minisig -p /tmp/minisign.pub
+          rm /tmp/minisign.key /tmp/minisign.pub 
 
 ### Uploading artifacts ###
 
