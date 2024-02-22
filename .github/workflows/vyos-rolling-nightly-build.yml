@@ -6,6 +6,11 @@ on:
 
   workflow_dispatch:
     inputs:
+      FAKE_BUILDING_PROCESS:
+        description: 'Skip all Smoketests and fake building process'
+        required: true
+        type: boolean
+        default: false
       BUILD_BY:
         description: 'Builder identifier (if empty autobuild@vyos.net is used)'
         default: ''
@@ -44,11 +49,6 @@ on:
         default: false
       SKIP_DOWNLOADS_PAGE_UPDATE:
         description: 'Skip downloads page update'
-        required: true
-        type: boolean
-        default: false
-      FAKE_BUILDING_PROCESS:
-        description: 'Skip all Smoketests and fake building process'
         required: true
         type: boolean
         default: false
