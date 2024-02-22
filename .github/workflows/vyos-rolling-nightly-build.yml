@@ -202,7 +202,7 @@ jobs:
       - name: "Building: create ISO image"
         id: build_iso
         run: |
-          ${{ env.DOCKER_CALL }}\
+          ${{ env.DOCKER_CALL }} \
           sudo --preserve-env ./build-vyos-image \
           --architecture amd64 \
           --build-by $BUILD_BY \
@@ -306,7 +306,7 @@ jobs:
             }
 
       - name: "Release publishing: generate changelog for vyos-build"
-        if: ${{ !inputs.SKIP_RELEASE_PUBLISHING && env.CHANGELOG_COMMIT_build != '' }} 
+        if: ${{ !inputs.SKIP_RELEASE_PUBLISHING && env.CHANGELOG_COMMIT_build }} 
         id: generate_changelog_for_vyos-build
         uses: mikepenz/release-changelog-builder-action@v4.1.0
         with:
@@ -390,7 +390,7 @@ jobs:
 
       - name: "Slack notification: identify a failed step"
         id: identify_a_failed_step
-        if: failure() && !inputs.SKIP_SLACK_NOTIFICATIONS
+        if: ${{ failure() && !inputs.SKIP_SLACK_NOTIFICATIONS }}
         run: |
           echo FAILED_STEP=$((cat <<EOF
           ${{ toJson(steps) }}
