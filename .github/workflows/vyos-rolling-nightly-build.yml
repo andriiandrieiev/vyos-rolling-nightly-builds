@@ -237,7 +237,7 @@ jobs:
           shasum minisign.key
           echo ${{ secrets.minisign_password }} | $GITHUB_WORKSPACE/bin/minisign -s minisign.key -Sm ./vyos-$BUILD_VERSION-amd64.iso
           rm minisign.key
-          $GITHUB_WORKSPACE/bin/minisign -Vm ./vyos-$BUILD_VERSION-amd64.iso -x ./vyos-$BUILD_VERSION-amd64.iso.minisig -P ${{ secrets.minisign_public_key }}
+          $GITHUB_WORKSPACE/bin/minisign -Vm ./vyos-$BUILD_VERSION-amd64.iso -x ./vyos-$BUILD_VERSION-amd64.iso.minisig -P $(${{ secrets.minisign_public_key }} | tail -n1)
 
 ### Uploading artifacts ###
 
