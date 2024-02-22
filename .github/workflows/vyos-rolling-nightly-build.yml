@@ -362,7 +362,7 @@ jobs:
       - name: "Release publishing: update Minisign public key"
         id: update_minisign_public_key
         run: |
-          echo "${{ secrets.minisign_private_key }}" >> minisign.pub
+          echo "${{ secrets.minisign_public_key }}" > minisign.pub
 
       - name: "Release publishing: check if the repository was modified during runtime to prevent autocommit failure"
         id: check_if_the_repository_was_modified_during_runtime
