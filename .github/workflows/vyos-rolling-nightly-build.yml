@@ -475,6 +475,8 @@ jobs:
           initial_comment: Smoketest log excerpt
           if_no_files_found: ignore
 
+### Update download page ###
+
   update-downloads-page:
     if: ${{ !inputs.SKIP_DOWNLOADS_PAGE_UPDATE }}
     needs: build-iso
