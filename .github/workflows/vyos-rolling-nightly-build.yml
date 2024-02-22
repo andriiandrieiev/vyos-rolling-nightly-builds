@@ -6,17 +6,17 @@ on:
 
   workflow_dispatch:
     inputs:
-      FAKE_BUILDING_PROCESS:
-        description: 'Skip all Smoketests and fake building process'
-        required: true
-        type: boolean
-        default: false
       BUILD_BY:
         description: 'Builder identifier (if empty autobuild@vyos.net is used)'
         default: ''
       BUILD_VERSION:
         description: 'Version number (if empty 1.5-rolling-$(date -u +%Y%m%d%H%M) is used)'
         default: ''
+      FAKE_BUILDING_PROCESS:
+        description: 'Skip all Smoketests and fake building process'
+        required: true
+        type: boolean
+        default: false
       SKIP_SMOKETEST_RAID1:
         description: 'Skip RAID1 Smoketest'
         required: true
